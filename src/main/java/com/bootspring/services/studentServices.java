@@ -5,28 +5,35 @@ import com.bootspring.hibernateUtil.HibernateUtil;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.query.Query;
+
 
 import java.util.List;
+import java.util.Queue;
 
 public class studentServices {
     private SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
 
 //  save the student
     public  void saveStudent(Student student){
+        Transaction beginTransaction = null;
         try(Session session = sessionFactory.openSession()) {
-            Transaction beginTransaction = session.beginTransaction();
+            beginTransaction = session.beginTransaction();
             session.persist(student);
             beginTransaction.commit();
             System.out.println("Student saved");
         }
         catch (Exception e){
+            if(beginTransaction != null){
+                beginTransaction.rollback();
+            }
             System.out.println(e.getMessage());
             return;
         }
     }
 
 //    get all Student
-    public List<Student> getAllStudents(Student student){
+    public List<Student> getAllStudents(){
         try(Session session = sessionFactory.openSession()){
             return session.createQuery("from Student", Student.class).list();
         } catch (Exception e) {
@@ -37,10 +44,17 @@ public class studentServices {
 
 //    delete a student by id
     public void deleteStudent(int studentId){
+        Transaction beginTransaction = null;
         try(Session session = sessionFactory.openSession()){
+            beginTransaction = session.beginTransaction();
             Student temp = session.find(Student.class,  studentId);
             session.remove(temp);
+            beginTransaction.commit();
+            System.out.println("Deleted");
         } catch (Exception e) {
+            if(beginTransaction != null){
+                beginTransaction.rollback();
+            }
             System.out.println(e.getMessage());
             return;
         }
@@ -57,5 +71,69 @@ public class studentServices {
         }
     }
 
+//    find student by name
+    public Student findStudentByName(String studentName){
+        try(Session session = sessionFactory.openSession()){
+            String getName ="From Student where firstName = :studentName";
+            Query<Student> query =session.createQuery(getName,Student.class);
+            query.setParameter(("studentName"), studentName);
+            List<Student> lists = query.list();
+            if(!lists.isEmpty()){
+                return lists.get(0);
+            }
+            else{
+                return null;
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return null;
+        }
+    }
 
+//    Delete student by name
+    public void deleteStudentByName(String studentName){
+        Transaction beginTransaction = null;
+        try(Session session = sessionFactory.openSession()){
+            beginTransaction = session.beginTransaction();
+
+            String getName = "From Student where firstName = :studentName";
+            Query<Student> query = session.createQuery(getName, Student.class);
+
+            List<Student> lists = query.list();
+
+            if(!lists.isEmpty()) {
+                for (Student st : lists) {
+                    session.remove(st);
+                }
+
+                beginTransaction.commit();
+                System.out.println("Deleted");
+            }
+            else{
+                System.out.println("Not found");
+            }
+        } catch (Exception e) {
+            if(beginTransaction!=null){
+                beginTransaction.rollback();
+            }
+            System.out.println(e.getMessage());
+            return;
+        }
+    }
+
+//    find student by department
+    public List<Student> findStudentByDepartment(String depart){
+        try(Session session = sessionFactory.openSession()){
+            String dept = "From Student where department = :depart";
+            Query<Student> query = session.createQuery(dept, Student.class);
+            List<Student> lists = query.list();
+
+            if(!lists.isEmpty()){
+                return lists;
+            }
+            else {
+                return null;
+            }
+        }
+    }
 }
