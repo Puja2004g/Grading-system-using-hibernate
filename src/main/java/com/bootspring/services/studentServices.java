@@ -136,4 +136,44 @@ public class studentServices {
             }
         }
     }
+
+//    count no. of students
+    public int countStudent(){
+        List<Student> getStudents = getAllStudents();
+        return getStudents.size();
+    }
+
+//  update student details
+    public void updateStudent(int id, Student student){
+        Transaction beginTransaction = null;
+        try(Session session = sessionFactory.openSession()) {
+            beginTransaction = session.beginTransaction();
+            Student oldStudent = session.find(Student.class, id);
+
+            if(oldStudent!=null){
+                if (student.getFirstName() != null && !student.getFirstName().isEmpty()) {
+                    oldStudent.setFirstName(student.getFirstName());
+                }
+
+                if (student.getLastName() != null && !student.getLastName().isEmpty()) {
+                    oldStudent.setLastName(student.getLastName());
+                }
+
+                if (student.getDepartment() != null && !student.getDepartment().isEmpty()) {
+                    oldStudent.setDepartment(student.getDepartment());
+                }
+
+            }
+
+//            session.merge(oldStudent);
+            beginTransaction.commit();
+            System.out.println("Updated");
+        } catch (Exception e) {
+            if(beginTransaction != null){
+                beginTransaction.rollback();
+            }
+            System.out.println(e.getMessage());
+            return;
+        }
+    }
 }

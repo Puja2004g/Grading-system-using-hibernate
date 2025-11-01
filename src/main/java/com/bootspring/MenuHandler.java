@@ -88,8 +88,33 @@ public class MenuHandler {
                 services.deleteStudentByName(name);
             }
 //            update student details
-            else if(n==7){
+            else if(n==7) {
+                System.out.println("Do you know the id of the student you want to update(Y/N): ");
 
+                String s = sc.nextLine();
+
+                int idu = 0;
+
+                if (s == "Y" || s == "y") {
+                    System.out.println("Enter id of the student: ");
+                    idu = Integer.parseInt(sc.nextLine());
+                } else {
+                    System.out.println("Enter the first name of the student: ");
+                    String str = sc.nextLine();
+                    Student temp = services.findStudentByName(str);
+                    idu = temp.getStudentId();
+                }
+
+                System.out.println("If you don't want to update leave it empty");
+                System.out.println("Enter updated first name: ");
+                String fname = sc.nextLine();
+                System.out.println("Enter updated last name: ");
+                String lname = sc.nextLine();
+                System.out.println("Enter updated department: ");
+                String udept = sc.nextLine();
+
+                Student temp = new Student(fname, lname, udept);
+                services.updateStudent(idu, temp);
             }
 //            find student by department
             else if(n==8){
@@ -104,7 +129,8 @@ public class MenuHandler {
             }
 //            count total number of students
             else if(n==9){
-
+                int num = services.countStudent();
+                System.out.println(num);
             }
             else{
                 return;
